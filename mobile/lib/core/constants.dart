@@ -8,7 +8,7 @@ const String kApiBaseUrl = String.fromEnvironment(
   defaultValue: 'http://10.0.2.2:3000',
 );
 
-const String kAppVersion = '1.0.0';
+const String kAppVersion = '1.1.0';
 
 const String kTokenKey = 'jwt_token';
 
