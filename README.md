@@ -122,9 +122,8 @@ A prebuilt `app-release.apk` (51 MB) ships at `mobile/build/app/outputs/flutter-
 ## Deployment (Render)
 
 1. Push this repo to GitHub.
-2. Render → **New → Web Service** → connect the repo → **Root Directory**: `backend`
-   - Build: `npm install` · Start: `npm start`
-3. Add environment variables: `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN=1h`, `NODE_ENV=production`.
+2. Render dashboard → **New → Blueprint** → pick the repo → confirm — `render.yaml` sets root dir, build/start commands, health check, and generates `JWT_SECRET` automatically.
+3. Open the service → **Environment** → add `MONGODB_URI` = your Atlas connection string (never committed to the repo).
 4. Atlas **Network Access** → add `0.0.0.0/0` — required because Render free-tier instances have no static egress IP. The database still requires credentials, and the credentials/URI are never in the repo (env vars only). For production you would pin static IPs via a paid tier/NAT.
 5. ⚠️ **Render free tier sleeps after inactivity** — the first request can take 30–60 s to wake. Warm it with `curl https://<your-app>.onrender.com/api/health` before opening the app.
 

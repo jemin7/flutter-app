@@ -1,0 +1,20 @@
+# Render Blueprint — deploy via: Render dashboard → New → Blueprint → pick this repo.
+# Secrets are never stored here: MONGODB_URI is entered in the dashboard, JWT_SECRET is auto-generated.
+services:
+  - type: web
+    name: assignment-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI
+        sync: false # paste your Atlas URI in the Render dashboard after first deploy
+      - key: JWT_SECRET
+        generateValue: true # Render creates a random secret
+      - key: JWT_EXPIRES_IN
+        value: 1h
+      - key: NODE_ENV
+        value: production
