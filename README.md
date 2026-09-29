@@ -117,7 +117,12 @@ cd mobile
 flutter build apk --release --dart-define=API_BASE_URL=https://<your-app>.onrender.com
 ```
 
-A prebuilt `app-release.apk` (51 MB) ships at `mobile/build/app/outputs/flutter-apk/app-release.apk`, built against `API_BASE_URL=http://192.168.0.105:3000` — i.e. it expects the backend running on the dev machine (`npm start` in `backend/`) and the phone on the same Wi-Fi. Rebuild with a deployed URL for a standalone demo.
+A prebuilt `app-release.apk` (51 MB) ships at `mobile/build/app/outputs/flutter-apk/app-release.apk`, built against the **deployed API** `https://assignment-api-bttc.onrender.com` — install it on any Android phone and log in; no local backend needed. (Render free tier sleeps after ~15 min idle: the first login attempt may take up to a minute — retry once.) Rebuild with:
+
+```bash
+cd mobile
+flutter build apk --release --dart-define=API_BASE_URL=https://assignment-api-bttc.onrender.com
+```
 
 ## Deployment (Render)
 
