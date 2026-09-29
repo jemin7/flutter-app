@@ -117,7 +117,7 @@ cd mobile
 flutter build apk --release --dart-define=API_BASE_URL=https://<your-app>.onrender.com
 ```
 
-Output: `mobile/build/app/outputs/flutter-apk/app-release.apk`
+A prebuilt `app-release.apk` (51 MB) ships at `mobile/build/app/outputs/flutter-apk/app-release.apk`, built against `API_BASE_URL=http://192.168.0.105:3000` — i.e. it expects the backend running on the dev machine (`npm start` in `backend/`) and the phone on the same Wi-Fi. Rebuild with a deployed URL for a standalone demo.
 
 ## Deployment (Render)
 
