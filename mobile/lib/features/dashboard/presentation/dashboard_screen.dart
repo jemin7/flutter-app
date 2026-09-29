@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 import '../../../core/widgets.dart';
 import '../../auth/data/auth_controller.dart';
 
@@ -53,9 +54,13 @@ class DashboardScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Welcome, ${user['username'] ?? 'user'}',
-                          style: Theme.of(context).textTheme.headlineSmall),
-                      const SizedBox(height: 8),
+                      Text('Welcome,',
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 2),
+                      Text('${user['username'] ?? 'user'}',
+                          style: Theme.of(context).textTheme.headlineMedium),
+                      const SizedBox(height: 10),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -76,9 +81,10 @@ class DashboardScreen extends ConsumerWidget {
                             crossAxisCount: columns,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.6,
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 14,
+                            childAspectRatio: 1.5,
+                            padding: const EdgeInsets.only(bottom: 24),
                             children: [
                               // 'dashboard' is you-are-here; a self-link card is a dead button.
                               for (final item in auth.menu.where((m) => m != 'dashboard'))
@@ -129,18 +135,33 @@ class _MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B1E22) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: AppTheme.floatingShadow(isDark),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(22),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(height: 8),
-              Text(label, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: scheme.primary.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, size: 24, color: scheme.primary),
+              ),
+              const Spacer(),
+              Text(label, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.start, maxLines: 2, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
