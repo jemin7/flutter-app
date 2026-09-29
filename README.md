@@ -199,4 +199,4 @@ Flutter: splash validates stored token (`/auth/me`) → dashboard or cleared-sto
 
 ## Git repository
 
-<!-- TODO(you): paste your GitHub repo URL -->
+https://github.com/jemin7/flutter-app
