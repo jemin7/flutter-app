@@ -78,11 +78,7 @@ class AuthController extends Notifier<AuthState> {
     await ref.read(tokenStoreProvider).clear();
     ref.read(sessionExpiredProvider.notifier).state = false;
     state = const AuthState();
-    ref.invalidate(authInvalidator);
   }
 }
-
-/// Invalidate this to wipe every cached provider on logout.
-final authInvalidator = Provider<void>((ref) {});
 
 final authControllerProvider = NotifierProvider<AuthController, AuthState>(AuthController.new);

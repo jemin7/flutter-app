@@ -55,11 +55,11 @@ class UserManagementScreen extends ConsumerWidget {
       });
       ref.invalidate(appUsersProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User updated')));
+        showAppSnackBar(context, 'User updated');
       }
     } on DioException catch (e) {
       final ex = toApiException(e);
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ex.message)));
+      if (context.mounted) showAppSnackBar(context, ex.message, error: true);
     }
   }
 
@@ -84,11 +84,11 @@ class UserManagementScreen extends ConsumerWidget {
       await ref.read(dioProvider).delete('/api/admin/users/${user.id}');
       ref.invalidate(appUsersProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User deleted')));
+        showAppSnackBar(context, 'User deleted');
       }
     } on DioException catch (e) {
       final ex = toApiException(e);
-      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ex.message)));
+      if (context.mounted) showAppSnackBar(context, ex.message, error: true);
     }
   }
 
@@ -115,7 +115,11 @@ class UserManagementScreen extends ConsumerWidget {
                 child: ListTile(
                   leading: CircleAvatar(child: Text(u.fullName.isEmpty ? '?' : u.fullName[0].toUpperCase())),
                   title: Text(u.fullName, style: const TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: Text('@${u.username} · ${u.role}${u.companyName != null ? ' · ${u.companyName}' : ''}'),
+                  subtitle: Text(
+                    '@${u.username} · ${u.role}${u.companyName != null ? ' · ${u.companyName}' : ''}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'delete') _deleteUser(ref, context, u);

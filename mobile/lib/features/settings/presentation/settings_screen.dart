@@ -45,10 +45,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       // Server is source of truth: refresh the auth state from the response.
       final user = res.data['data']['user'] as Map<String, dynamic>;
       ref.read(authControllerProvider.notifier).updateCachedUser(user);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile updated')));
+      if (mounted) showAppSnackBar(context, 'Profile updated');
     } on DioException catch (e) {
       final ex = toApiException(e);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ex.message)));
+      if (mounted) showAppSnackBar(context, ex.message, error: true);
     } finally {
       if (mounted) setState(() => _savingProfile = false);
     }
@@ -69,14 +69,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       });
       _currentPassword.clear();
       _newPassword.clear();
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password changed')));
+      if (mounted) showAppSnackBar(context, 'Password changed');
     } on DioException catch (e) {
       final ex = toApiException(e);
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(ex.fieldErrors['currentPassword'] ?? ex.message)));
-      }
+      if (mounted) showAppSnackBar(context, ex.fieldErrors['currentPassword'] ?? ex.message, error: true);
     } finally {
       if (mounted) setState(() => _savingPassword = false);
     }

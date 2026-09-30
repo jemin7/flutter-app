@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/exceptions.dart';
@@ -13,6 +14,7 @@ class UserDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(externalUserByIdProvider(id));
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('User details')),
@@ -25,22 +27,35 @@ class UserDetailsScreen extends ConsumerWidget {
         data: (u) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // Hero header: identity at a glance.
             Card(
+              margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+                padding: const EdgeInsets.all(20),
+                child: Column(
                   children: [
-                    CircleAvatar(radius: 28, child: Text(u.initials, style: const TextStyle(fontSize: 20))),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(u.name, style: Theme.of(context).textTheme.titleLarge),
-                          Text(u.email, style: Theme.of(context).textTheme.bodySmall),
-                        ],
+                    CircleAvatar(
+                      radius: 34,
+                      backgroundColor: scheme.primaryContainer,
+                      child: Text(
+                        u.initials,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(color: scheme.onPrimaryContainer),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    Text(u.name, style: Theme.of(context).textTheme.headlineSmall, textAlign: TextAlign.center),
+                    if (u.username.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text('@${u.username}', style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                    if (u.company.name.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Chip(
+                        avatar: Icon(Icons.business, size: 16, color: scheme.primary),
+                        label: Text(u.company.name),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -50,9 +65,9 @@ class UserDetailsScreen extends ConsumerWidget {
               title: 'Contact',
               icon: Icons.contact_mail_outlined,
               children: [
-                _Row(icon: Icons.email_outlined, label: 'Email', value: u.email),
-                _Row(icon: Icons.phone_outlined, label: 'Phone', value: u.phone),
-                _Row(icon: Icons.language, label: 'Website', value: u.website),
+                _ActionRow(icon: Icons.email_outlined, label: 'Email', value: u.email),
+                _ActionRow(icon: Icons.phone_outlined, label: 'Phone', value: u.phone),
+                _ActionRow(icon: Icons.language, label: 'Website', value: u.website),
               ],
             ),
             const SizedBox(height: 12),
@@ -63,7 +78,7 @@ class UserDetailsScreen extends ConsumerWidget {
                 _Row(icon: Icons.home_outlined, label: 'Street', value: '${u.address.suite}, ${u.address.street}'),
                 _Row(icon: Icons.location_city_outlined, label: 'City', value: u.address.city),
                 _Row(icon: Icons.tag, label: 'Zipcode', value: u.address.zipcode),
-                _Row(icon: Icons.public, label: 'Lat / Lng', value: '${u.address.geo.lat}, ${u.address.geo.lng}'),
+                _Row(icon: Icons.public, label: 'Coordinates', value: '${u.address.geo.lat}, ${u.address.geo.lng}'),
               ],
             ),
             const SizedBox(height: 12),
@@ -73,7 +88,7 @@ class UserDetailsScreen extends ConsumerWidget {
               children: [
                 _Row(icon: Icons.business, label: 'Name', value: u.company.name),
                 _Row(icon: Icons.format_quote, label: 'Catch phrase', value: u.company.catchPhrase),
-                _Row(icon: Icons.work_outline, label: 'BS', value: u.company.bs),
+                _Row(icon: Icons.work_outline, label: 'Focus', value: u.company.bs),
               ],
             ),
           ],
@@ -93,8 +108,9 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -121,6 +137,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (value.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -129,8 +146,50 @@ class _Row extends StatelessWidget {
           Icon(icon, size: 18, color: Theme.of(context).colorScheme.outline),
           const SizedBox(width: 12),
           SizedBox(width: 90, child: Text(label, style: Theme.of(context).textTheme.bodySmall)),
-          Expanded(child: Text(value.isEmpty ? '—' : value)),
+          const SizedBox(width: 4),
+          Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium)),
         ],
+      ),
+    );
+  }
+}
+
+/// Row that copies the value to clipboard on tap, with a copy affordance.
+class _ActionRow extends StatelessWidget {
+  const _ActionRow({required this.icon, required this.label, required this.value});
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: InkWell(
+        onTap: () async {
+          // ponytail: copying is the no-dependency action; upgrade path is url_launcher for tel:/mailto:.
+          await Clipboard.setData(ClipboardData(text: value));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text('$label copied to clipboard')));
+          }
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: scheme.outline),
+            const SizedBox(width: 12),
+            SizedBox(width: 90, child: Text(label, style: Theme.of(context).textTheme.bodySmall)),
+            const SizedBox(width: 4),
+            Expanded(child: Text(value, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.primary))),
+            Icon(Icons.copy_all_outlined, size: 16, color: scheme.outline),
+          ],
+        ),
       ),
     );
   }

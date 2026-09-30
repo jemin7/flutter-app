@@ -129,6 +129,17 @@ class ErrorView extends StatelessWidget {
   }
 }
 
+/// Single snackbar entry point: hides any current one first, and gives errors
+/// longer on-screen time so long API messages stay readable.
+void showAppSnackBar(BuildContext context, String message, {bool error = false}) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: error ? 6 : 3),
+    ));
+}
+
 /// Slim offline banner shown at the top of any screen while offline.
 class OfflineBanner extends ConsumerWidget {
   const OfflineBanner({super.key});

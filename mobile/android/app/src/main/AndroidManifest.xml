@@ -2,7 +2,7 @@
     <!-- Local dev only: emulator talks to http://10.0.2.2 (cleartext). Remove for production HTTPS builds. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="Company Directory"
+        android:label="StaffHub"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">

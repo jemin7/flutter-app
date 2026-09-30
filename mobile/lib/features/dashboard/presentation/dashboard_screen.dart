@@ -77,13 +77,15 @@ class DashboardScreen extends ConsumerWidget {
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final columns = constraints.maxWidth > 600 ? 3 : 2;
+                          // Narrow phones: taller tiles so two-line labels don't clip.
+                          final aspect = constraints.maxWidth > 600 ? 1.5 : (constraints.maxWidth < 360 ? 1.15 : 1.3);
                           return GridView.count(
                             crossAxisCount: columns,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             mainAxisSpacing: 14,
                             crossAxisSpacing: 14,
-                            childAspectRatio: 1.5,
+                            childAspectRatio: aspect,
                             padding: const EdgeInsets.only(bottom: 24),
                             children: [
                               // 'dashboard' is you-are-here; a self-link card is a dead button.
@@ -91,7 +93,7 @@ class DashboardScreen extends ConsumerWidget {
                                 _MenuCard(
                                   label: kMenuLabels[item] ?? item,
                                   icon: _iconFor(item),
-                                  onTap: () => context.go(_routeFor(item)),
+                                  onTap: () => context.push(_routeFor(item)),
                                 ),
                             ],
                           );

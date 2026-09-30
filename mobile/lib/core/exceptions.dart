@@ -26,8 +26,6 @@ class ApiException implements Exception {
   /// Per-field messages from the server's `errors` object (e.g. {email: "..."}).
   final Map<String, String> fieldErrors;
 
-  bool get isOffline => kind == ApiErrorKind.network;
-
   @override
   String toString() => message;
 }

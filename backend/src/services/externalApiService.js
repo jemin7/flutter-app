@@ -11,8 +11,4 @@ async function fetchExternalUsers() {
   return cache.data;
 }
 
-function clearExternalCache() {
-  cache = { data: null, fetchedAt: 0 };
-}
-
-module.exports = { fetchExternalUsers, clearExternalCache };
+module.exports = { fetchExternalUsers };

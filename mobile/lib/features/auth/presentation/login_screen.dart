@@ -28,9 +28,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (ref.read(sessionExpiredProvider)) {
         ref.read(sessionExpiredProvider.notifier).state = false;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(const SnackBar(content: Text('Session expired, please log in again')));
+        showAppSnackBar(context, 'Session expired, please log in again');
       }
     });
   }
@@ -50,9 +48,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref.read(authControllerProvider.notifier).login(_identifier.text.trim(), _password.text);
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(e.message)));
+      showAppSnackBar(context, e.message, error: true);
       setState(() => _serverError = e.message);
     }
   }
@@ -99,13 +95,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     if (_serverError != null) ...[
                       const SizedBox(height: 12),
-                      Text(_serverError!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline, size: 18, color: Theme.of(context).colorScheme.error),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _serverError!,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: Theme.of(context).colorScheme.onErrorContainer),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 24),
                     PrimaryButton(label: 'Log in', onPressed: _submit, loading: loading),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () => context.go('/register'),
+                      onPressed: () => context.push('/register'),
                       child: const Text("Don't have an account? Register"),
                     ),
                   ],

@@ -45,12 +45,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         'confirmPassword': _confirmPassword.text,
       });
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful. Please log in.')));
+      showAppSnackBar(context, 'Registration successful. Please log in.');
       context.go('/login');
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() => _fieldErrors = e.fieldErrors);
-      ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(e.message)));
+      showAppSnackBar(context, e.message, error: true);
     }
   }
 

@@ -1,5 +1,5 @@
 name: assignment_app
-description: Flutter app for the take-home assignment (Riverpod + go_router + dio).
+description: StaffHub — company directory app (Riverpod + go_router + dio).
 publish_to: "none"
 version: 1.1.0+2
 

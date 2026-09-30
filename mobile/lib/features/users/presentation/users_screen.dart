@@ -77,18 +77,41 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                     itemCount: filtered.length,
                     itemBuilder: (_, i) {
                       final u = filtered[i];
                       return Card(
+                        margin: const EdgeInsets.only(bottom: 10),
                         child: ListTile(
-                          leading: CircleAvatar(child: Text(u.initials)),
-                          title: Text(u.name),
-                          subtitle: Text('${u.email}\n${u.company.name}'),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                            child: Text(
+                              u.initials,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          title: Text(u.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                          subtitle: Text.rich(
+                            TextSpan(
+                              text: u.email,
+                              style: Theme.of(context).textTheme.bodySmall,
+                              children: [
+                                const TextSpan(text: '\n'),
+                                TextSpan(
+                                  text: u.company.name,
+                                  style: TextStyle(color: Theme.of(context).colorScheme.outline),
+                                ),
+                              ],
+                            ),
+                          ),
                           isThreeLine: true,
                           trailing: const Icon(Icons.chevron_right),
-                          onTap: () => context.go('/users/${u.id}'),
+                          onTap: () => context.push('/users/${u.id}'),
                         ),
                       );
                     },
