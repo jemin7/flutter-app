@@ -16,6 +16,9 @@ const registerRules = [
     .isLength({ min: 3, max: 20 }).withMessage('Username must be 3-20 characters')
     .matches(/^[a-zA-Z0-9_]+$/).withMessage('Username can only contain letters, numbers and underscore'),
   body('email').isString().trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Invalid email address'),
+  // Optional: absent/null/empty -> no company. A non-empty value must be a string;
+  // existence is checked against the external directory in the controller.
+  body('companyName').optional({ values: 'falsy' }).isString().withMessage('Company must be a string').trim(),
   passwordRules(),
   body('confirmPassword').isString().trim().notEmpty().withMessage('Confirm password is required'),
 ];

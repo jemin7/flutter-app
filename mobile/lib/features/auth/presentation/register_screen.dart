@@ -1,11 +1,23 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api_client.dart';
 import '../../../core/exceptions.dart';
 import '../../../core/validators.dart';
 import '../../../core/widgets.dart';
 import '../data/auth_controller.dart';
+
+/// Company names for the register dropdown — public endpoint, no auth needed.
+final registerCompaniesProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+  try {
+    final res = await ref.watch(dioProvider).get('/api/auth/companies');
+    return List<String>.from(res.data['data'] as List? ?? []);
+  } on DioException catch (e) {
+    throw toApiException(e);
+  }
+});
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -21,6 +33,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
+  String? _companyName;
   bool _showPassword = false;
   Map<String, String> _fieldErrors = {};
 
@@ -36,6 +49,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _fieldErrors = {});
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
+    final company = _companyName; // local so null-promotion works below
     try {
       await ref.read(authControllerProvider.notifier).register({
         'fullName': _fullName.text.trim(),
@@ -43,6 +57,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         'email': _email.text.trim(),
         'password': _password.text,
         'confirmPassword': _confirmPassword.text,
+        // Company is optional; omit when empty so "no company" is unambiguous.
+        if (company != null && company.isNotEmpty) 'companyName': company,
       });
       if (!mounted) return;
       showAppSnackBar(context, 'Registration successful. Please log in.');
@@ -57,6 +73,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final loading = ref.watch(authControllerProvider).loading;
+    final companiesAsync = ref.watch(registerCompaniesProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Create account')),
       body: SafeArea(
@@ -116,6 +134,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       onSubmitted: (_) => _submit(),
                       errorText: _fieldErrors['confirmPassword'],
                       validator: Validators.confirmPassword(() => _password.text),
+                    ),
+                    const SizedBox(height: 16),
+                    // Optional: new users may pick their company now (validated
+                    // against the directory server-side) or leave it unassigned.
+                    companiesAsync.when(
+                      loading: () => DropdownButtonFormField<String>(
+                        initialValue: null,
+                        decoration: const InputDecoration(labelText: 'Company (optional)'),
+                        items: const [],
+                        onChanged: null,
+                      ),
+                      error: (_, __) => DropdownButtonFormField<String>(
+                        initialValue: _companyName,
+                        decoration: const InputDecoration(
+                          labelText: 'Company (optional)',
+                          helperText: 'Could not load companies — tap retry',
+                        ),
+                        items: const [],
+                        onChanged: (_) {},
+                      ),
+                      data: (companies) => DropdownButtonFormField<String>(
+                        initialValue: _companyName,
+                        decoration: const InputDecoration(labelText: 'Company (optional)'),
+                        hint: const Text('Choose your company'),
+                        items: [
+                          const DropdownMenuItem(value: '', child: Text('— No company —')),
+                          ...companies.map((c) => DropdownMenuItem(value: c, child: Text(c))),
+                        ],
+                        onChanged: (v) => setState(() => _companyName = v),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     PrimaryButton(label: 'Register', onPressed: _submit, loading: loading),

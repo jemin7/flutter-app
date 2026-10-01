@@ -139,13 +139,14 @@ flutter build apk --release --dart-define=API_BASE_URL=https://assignment-api-bt
 | User | `hemant` | hemant@test.com | `User@123` | Romaguera-Crona |
 | User | `priya` | priya@test.com | `User@123` | Deckow-Crist |
 
-> New self-registered users get role `USER` and **no company** until a Super Admin assigns one.
+> New self-registered users get role `USER`. They **may pick their company on the register screen** (validated server-side against the external directory) or leave it empty; Super Admins can still assign/change it later.
 
 ## API endpoints
 
 | Method | Endpoint | Auth | Roles | Purpose |
 |---|---|---|---|---|
-| POST | `/api/auth/register` | — | — | register (role/company always forced to USER/null) |
+| POST | `/api/auth/register` | — | — | register (role always forced to USER; optional companyName validated against the directory) |
+| GET | `/api/auth/companies` | — | — | public company names for the register dropdown |
 | POST | `/api/auth/login` | — | — | login with username **or** email |
 | GET | `/api/auth/me` | JWT | any | session validation + menu |
 | GET | `/api/external-users` | JWT | any | JSONPlaceholder users, filtered by company |
@@ -177,7 +178,7 @@ Flutter: splash validates stored token (`/auth/me`) → dashboard or cleared-sto
 
 ## Known limitations / assumptions
 
-- New registrants have no company until a Super Admin assigns one (by design — companies come from the external API, so none can be trusted from the register payload).
+- New registrants choose their own company at registration. This is a deliberate trade-off: the choice is validated against the external directory server-side, but anyone may still claim any listed company — if that is too permissive for a real deployment, add an admin-approval step before granting directory access.
 - The external-API cache is in-memory per instance (5 min) — swap for Redis if you run multiple instances.
 - Render free tier sleeps (~30–60 s cold start on first request).
 - `0.0.0.0/0` Atlas network access is a demo compromise documented above.

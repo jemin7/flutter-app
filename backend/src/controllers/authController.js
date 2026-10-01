@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { signToken } = require('../services/tokenService');
+const { fetchExternalUsers } = require('../services/externalApiService');
 const { ApiError } = require('../middleware/errors');
 const { asyncHandler } = require('../middleware/errorHandler');
 
@@ -26,7 +27,7 @@ function profilePayload(user) {
 }
 
 const register = asyncHandler(async (req, res) => {
-  const { fullName, username, email, password, confirmPassword } = req.body;
+  const { fullName, username, email, password, confirmPassword, companyName } = req.body;
 
   if (password !== confirmPassword) {
     throw new ApiError(400, 'Validation failed', { confirmPassword: 'Passwords do not match' });
@@ -44,8 +45,19 @@ const register = asyncHandler(async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  // ponytail: role/companyName hard-coded — register can never create an admin
-  const user = await User.create({ fullName, username: normUsername, email: normEmail, passwordHash, role: 'USER', companyName: null });
+
+  // Company is user-chosen but must exist in the external directory — same check
+  // the admin endpoint uses — so nobody can register into an arbitrary company.
+  // ponytail: role stays hard-coded — register can never create an admin.
+  let assignedCompany = null;
+  if (companyName !== undefined && companyName !== null && String(companyName).trim() !== '') {
+    const companies = await fetchExternalUsers();
+    const valid = companies.some((u) => u.company && u.company.name === companyName);
+    if (!valid) throw new ApiError(400, 'Validation failed', { companyName: 'Invalid company name' });
+    assignedCompany = companyName;
+  }
+
+  const user = await User.create({ fullName, username: normUsername, email: normEmail, passwordHash, role: 'USER', companyName: assignedCompany });
 
   res.status(201).json({ success: true, data: null, message: 'Registration successful. Please log in.', errors: null });
 });

@@ -35,12 +35,45 @@ describe('Auth: register', () => {
 
   beforeEach(reset);
 
-  it('registers a user as USER with no company, even if role/companyName are injected', async () => {
+  it('registers with a valid company, ignoring an injected role', async () => {
     const res = await register({ ...valid, role: 'SUPER_ADMIN', companyName: 'Romaguera-Crona' });
     expect(res.status).toBe(201);
     const doc = await User.findOne({ username: 'testuser' });
-    expect(doc.role).toBe('USER');
-    expect(doc.companyName).toBeNull();
+    expect(doc.role).toBe('USER'); // role is still hard-coded — cannot self-promote
+    expect(doc.companyName).toBe('Romaguera-Crona');
+  });
+
+  it('registers with no company when companyName is absent, empty, or null', async () => {
+    await register(valid);
+    const none = await User.findOne({ username: 'testuser' });
+    expect(none.companyName).toBeNull();
+
+    await register({ ...valid, username: 'blankco', email: 'blank@test.com', companyName: '' });
+    const blank = await User.findOne({ username: 'blankco' });
+    expect(blank.companyName).toBeNull();
+
+    await register({ ...valid, username: 'nullco', email: 'null@test.com', companyName: null });
+    const nulled = await User.findOne({ username: 'nullco' });
+    expect(nulled.companyName).toBeNull();
+  });
+
+  it('rejects an invalid (non-directory) company name with 400 + field error', async () => {
+    const res = await register({ ...valid, companyName: 'Not-A-Real-Company' });
+    expect(res.status).toBe(400);
+    expect(res.body.errors.companyName).toBeDefined();
+  });
+
+  it('rejects a non-string companyName', async () => {
+    const res = await register({ ...valid, companyName: { $gt: '' } });
+    expect(res.status).toBe(400);
+  });
+
+  it('exposes GET /api/auth/companies publicly for the register screen', async () => {
+    const res = await request(app).get('/api/auth/companies');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toContain('Romaguera-Crona');
+    expect(res.body.data).toContain('Deckow-Crist');
+    expect(res.body.data.length).toBeGreaterThanOrEqual(2);
   });
 
   it('rejects weak password, bad username, bad email', async () => {
