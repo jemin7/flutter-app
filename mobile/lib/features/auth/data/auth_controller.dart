@@ -50,6 +50,10 @@ class AuthController extends Notifier<AuthState> {
       final res = await _dio.post('/api/auth/login', data: {'identifier': identifier, 'password': password});
       final data = res.data['data'] as Map<String, dynamic>;
       await ref.read(tokenStoreProvider).save(data['token'] as String);
+      // Reset the expiry flag: a StateProvider won't notify when set to the same
+      // value, so a flag left true by an earlier wrong-password 401 (before the
+      // interceptor exclusion) would swallow the next genuine expiry redirect.
+      ref.read(sessionExpiredProvider.notifier).state = false;
       state = AuthState(user: data['user'], menu: List<String>.from(data['menu']));
     } on DioException catch (e) {
       state = const AuthState();

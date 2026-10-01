@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,12 +15,19 @@ import '../features/users/presentation/users_screen.dart';
 import '../widgets/error_screen.dart';
 import '../widgets/unauthorized_screen.dart';
 
+// Built ONCE. Auth changes bump the ValueNotifier, which re-runs the redirect —
+// recreating the GoRouter instead would restart navigation at /splash mid-request
+// (e.g. leaving the Register screen before its server error could be shown).
 final routerProvider = Provider<GoRouter>((ref) {
-  final auth = ref.watch(authControllerProvider);
+  final refresh = ValueNotifier(0);
+  ref.listen(authControllerProvider, (_, __) => refresh.value++);
+  ref.onDispose(refresh.dispose);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: refresh,
     redirect: (context, state) {
+      final auth = ref.read(authControllerProvider); // read: never rebuild the router
       final loc = state.matchedLocation;
       final loggedIn = auth.user != null;
       final onAuthFlow = loc == '/splash' || loc == '/login' || loc == '/register';

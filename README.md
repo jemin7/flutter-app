@@ -85,18 +85,15 @@ cp .env.example .env          # fill MONGODB_URI + JWT_SECRET
 npm install
 npm run seed                  # creates admin / hemant / priya (idempotent, safe to re-run)
 npm run dev                   # http://localhost:3000
-npm test                      # 27 tests, in-memory Mongo — never touches Atlas
+npm test                      # 31 tests, in-memory Mongo — never touches Atlas
 ```
 
 Sanity check: `curl http://localhost:3000/api/health` → `{"success":true,...}`
 
 ## Flutter — run it
 
-First time only: the `mobile/` folder ships without native scaffolding. Generate it inside `mobile/` (it merges with the existing `lib/`, `pubspec.yaml`, and the Android/iOS manifests in this repo):
-
 ```bash
 cd mobile
-flutter create . --org com.example --project-name assignment_app --platforms android,ios
 flutter pub get
 ```
 
@@ -140,6 +137,8 @@ flutter build apk --release --dart-define=API_BASE_URL=https://assignment-api-bt
 | User | `priya` | priya@test.com | `User@123` | Deckow-Crist |
 
 > New self-registered users get role `USER`. They **may pick their company on the register screen** (validated server-side against the external directory) or leave it empty; Super Admins can still assign/change it later.
+>
+> ⚠️ **Security trade-off:** self-service company selection means anyone can register and claim any listed company — the server only proves the company *exists*, not that the registrant *belongs* to it. This weakens strict company isolation and is acceptable **only** because this is a demo; in a real deployment, registration must leave the company empty and a Super Admin assigns it (or add an approval step).
 
 ## API endpoints
 
@@ -166,7 +165,7 @@ All responses use one shape: `{ success, data, message, errors }`.
 ## How authorization is enforced (server-side, not just UI)
 
 - **Authentication** — every protected route runs `authenticate`: verifies the JWT, then loads the user **fresh from the DB on every request**, so role changes/deletions take effect on the next request, not at next login. Expired → 401 `TOKEN_EXPIRED`; invalid → 401 `TOKEN_INVALID`. `passwordHash` is `select: false` and stripped by the `toJSON` transform.
-- **Company-based** — `/api/external-users` fetches the upstream list on the **server** and filters by `company.name === user.companyName`. A USER calling `/api/external-users/3` directly with a valid token for a user of another company gets **403** — the data is never sent to the client to filter. No company assigned → 200 + empty list + "No company assigned...".
+- **Company-based** — `/api/external-users` fetches the upstream list on the **server** and filters by `company.name === user.companyName`. A USER calling `/api/external-users/3` directly with a valid token for a user of another company gets **403** — the data is never sent to the client to filter. No company assigned → 403 + "No company assigned. Contact your administrator." (the request is rejected, not silently emptied).
 - **Role-based** — `/api/admin/*` and `/api/reports/*` run `authorize('SUPER_ADMIN')` **on the server**. A USER hitting them with a valid token gets 403 regardless of what the app UI shows. The Flutter go_router redirect to `/unauthorized` is UX only — both layers exist.
 - **Input hardening** — bodies where strings are expected must be plain strings (NoSQL `$gt`-style objects → 400); keys starting with `$` or containing `.` → 400; duplicates → 409 via pre-check + unique indexes + `11000` catch; rate limit on `/api/auth/*`; helmet; field-level validation messages.
 

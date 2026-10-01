@@ -16,6 +16,10 @@ const reportRoutes = require('./routes/reportRoutes');
 function createApp() {
   const app = express();
 
+  // Behind Render's reverse proxy: express-rate-limit must trust X-Forwarded-For,
+  // otherwise every client shares the proxy's IP and one global 100/15min bucket.
+  app.set('trust proxy', 1);
+
   app.use(helmet());
   app.use(cors());
   app.use(express.json({ limit: '100kb' }));

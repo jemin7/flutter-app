@@ -25,7 +25,10 @@ final dioProvider = Provider<Dio>((ref) {
     onError: (err, handler) async {
       // 401 only: expired/invalid token — clear session; router redirects to login.
       // 403 stays put: authorized user, just not allowed that resource.
-      if (err.response?.statusCode == 401) {
+      // /api/auth/login is excluded: a wrong password is not a session expiry,
+      // and a stale-true flag would swallow the next real expiry (StateProvider
+      // does not notify when the value is unchanged).
+      if (err.response?.statusCode == 401 && !err.requestOptions.path.contains('/api/auth/login')) {
         await ref.read(tokenStoreProvider).clear();
         ref.read(sessionExpiredProvider.notifier).state = true;
       }

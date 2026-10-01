@@ -48,7 +48,7 @@ const register = asyncHandler(async (req, res) => {
 
   // Company is user-chosen but must exist in the external directory — same check
   // the admin endpoint uses — so nobody can register into an arbitrary company.
-  // ponytail: role stays hard-coded — register can never create an admin.
+  // Role stays hard-coded: register can never create an admin.
   let assignedCompany = null;
   if (companyName !== undefined && companyName !== null && String(companyName).trim() !== '') {
     const companies = await fetchExternalUsers();
@@ -57,7 +57,7 @@ const register = asyncHandler(async (req, res) => {
     assignedCompany = companyName;
   }
 
-  const user = await User.create({ fullName, username: normUsername, email: normEmail, passwordHash, role: 'USER', companyName: assignedCompany });
+  await User.create({ fullName, username: normUsername, email: normEmail, passwordHash, role: 'USER', companyName: assignedCompany });
 
   res.status(201).json({ success: true, data: null, message: 'Registration successful. Please log in.', errors: null });
 });
