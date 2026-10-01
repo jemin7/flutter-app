@@ -112,7 +112,7 @@ Flutter tests: `flutter test` (validators, external-user model, login widget tes
 
 ## Release APK
 
-**Download:** https://github.com/jemin7/flutter-app/releases/download/v1.1.0/app-release.apk
+**Download:** https://github.com/jemin7/flutter-app/releases/download/v1.1.1/app-release.apk
 
 A prebuilt `app-release.apk` (51 MB) also ships at `mobile/build/app/outputs/flutter-apk/app-release.apk`, built against the **deployed API** `https://assignment-api-bttc.onrender.com` — install it on any Android phone and log in; no local backend needed. (Render free tier sleeps after ~15 min idle: the first login attempt may take up to a minute — retry once.)
 
