@@ -1,8 +1,8 @@
 # Take-Home Assignment — Flutter + Express + MongoDB Atlas
 
-[![Download APK](https://img.shields.io/badge/Download-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/jemin7/flutter-app/releases/latest/download/app-release.apk)
+[![Download APK](https://img.shields.io/badge/Download-StaffHub.apk-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/jemin7/flutter-app/releases/latest/download/StaffHub.apk)
 
-**📱 Grab the prebuilt app — no setup needed:** download **[app-release.apk](https://github.com/jemin7/flutter-app/releases/latest/download/app-release.apk)** (always the latest release), install on any Android phone, and log in. See [Release APK](#release-apk) for details. All versions: [releases](https://github.com/jemin7/flutter-app/releases).
+**📱 Grab the prebuilt app — no setup needed:** download **[StaffHub.apk](https://github.com/jemin7/flutter-app/releases/latest/download/StaffHub.apk)** (always the latest release), install on any Android phone, and log in. See [Release APK](#release-apk) for details. All versions: [releases](https://github.com/jemin7/flutter-app/releases).
 
 Mobile app (Android + iOS) backed by an Express API and MongoDB Atlas. The **Flutter app never talks to jsonplaceholder.typicode.com directly** — the backend proxies the external API and enforces company/role authorization server-side; the Flutter side only mirrors those rules as UX guards.
 
@@ -113,9 +113,9 @@ Flutter tests: `flutter test` (validators, external-user model, login widget tes
 
 ## Release APK
 
-**Download:** https://github.com/jemin7/flutter-app/releases/download/v1.1.1/app-release.apk
+**Download:** https://github.com/jemin7/flutter-app/releases/download/v1.1.1/StaffHub.apk (published as `StaffHub.apk`)
 
-A prebuilt `app-release.apk` (51 MB) also ships at `mobile/build/app/outputs/flutter-apk/app-release.apk`, built against the **deployed API** `https://assignment-api-bttc.onrender.com` — install it on any Android phone and log in; no local backend needed. (Render free tier sleeps after ~15 min idle: the first login attempt may take up to a minute — retry once.)
+The Gradle build outputs `app-release.apk` at `mobile/build/app/outputs/flutter-apk/` (51 MB) — that file is published on GitHub Releases renamed to **`StaffHub.apk`**, built against the **deployed API** `https://assignment-api-bttc.onrender.com` — install it on any Android phone and log in; no local backend needed. (Render free tier sleeps after ~15 min idle: the first login attempt may take up to a minute — retry once.)
 
 Rebuild with:
 
