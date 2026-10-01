@@ -1,5 +1,9 @@
 # Take-Home Assignment — Flutter + Express + MongoDB Atlas
 
+[![Download APK](https://img.shields.io/badge/Download-APK-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/jemin7/flutter-app/releases/latest/download/app-release.apk)
+
+**📱 Grab the prebuilt app — no setup needed:** download **[app-release.apk](https://github.com/jemin7/flutter-app/releases/latest/download/app-release.apk)** (always the latest release), install on any Android phone, and log in. See [Release APK](#release-apk) for details. All versions: [releases](https://github.com/jemin7/flutter-app/releases).
+
 Mobile app (Android + iOS) backed by an Express API and MongoDB Atlas. The **Flutter app never talks to jsonplaceholder.typicode.com directly** — the backend proxies the external API and enforces company/role authorization server-side; the Flutter side only mirrors those rules as UX guards.
 
 ## Architecture
